@@ -32,24 +32,24 @@ Le microservice écoute sur le port **`8081`** et interagit avec le client HTTP 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Joueur as Client HTTP (Navigateur / Bruno)
+    actor Joueur as Client HTTP
     participant Users as User Service (:8081)
     participant Games as Square Games API (:8080)
 
-    Note over Joueur,Users: 1. Inscription & Authentification
-    Joueur->>Users: POST /auth/login {"username": "Alice", "password": "password123"}
-    Users-->>Joueur: 200 OK {"token": "eyJhbGciOi...", "role": "ROLE_USER"}
+    Note over Joueur,Users: 1. Inscription et Authentification
+    Joueur->>Users: POST /auth/login (Alice / password123)
+    Users-->>Joueur: 200 OK (Jeton JWT émis)
 
-    Note over Joueur,Games: 2. Requête vers le moteur de jeu avec le Jeton
-    Joueur->>Games: POST /games (Header: Authorization: Bearer eyJhbGciOi...)
-    Note over Games: Validation LOCALE du JWT (0 appel réseau vers :8081)
-    Games-->>Joueur: 200 OK {"id": "game-uuid", "status": "ONGOING"}
+    Note over Joueur,Games: 2. Requête de jeu avec Jeton JWT
+    Joueur->>Games: POST /games (Authorization: Bearer JWT)
+    Note over Games: Validation locale du JWT (0 appel réseau vers :8081)
+    Games-->>Joueur: 200 OK (Partie créée)
 
-    Note over Joueur,Games: 3. Fallback historique (Itération 4 sans JWT)
-    Joueur->>Games: POST /games (Header: X-UserId: alice-uuid)
-    Games->>Users: GET /users/alice-uuid/valid (Appel RestClient)
+    Note over Joueur,Games: 3. Fallback historique (Itération 4)
+    Joueur->>Games: POST /games (Header: X-UserId)
+    Games->>Users: GET /users/{id}/valid (Appel RestClient)
     Users-->>Games: 200 OK (true)
-    Games-->>Joueur: 200 OK {"id": "game-uuid"}
+    Games-->>Joueur: 200 OK (Partie créée)
 ```
 
 ---
