@@ -8,6 +8,12 @@ guide/
 *.md
 !README.md
 
+### Environment & Secrets ###
+.env
+.env.local
+.env.*.local
+!.env.example
+
 ### IntelliJ IDEA ###
 .idea/
 *.iws

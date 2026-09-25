@@ -191,14 +191,23 @@ Le microservice utilise une base relationnelle en mémoire **H2** :
 
 ## 🚀 Démarrage & Tests Automatisés
 
-### 1. Démarrer le Serveur
+### 1. Variables d'Environnement & Secrets
+Par défaut, une clé de repli est configurée pour le développement local. Pour personnaliser ou sécuriser les clés en production :
+```bash
+cp .env.example .env
+# Adapter JWT_SECRET et JWT_EXPIRATION dans .env
+```
+*Le fichier `.env` est ignoré par Git.*
+
+### 2. Démarrer le Serveur
 ```bash
 cd /home/user/Documents/Cours/JavaSpringUsers
 ./mvnw spring-boot:run
 ```
 *(Le serveur démarre sur le port `8081`).*
 
-### 2. Exécuter la Suite de Tests Automatisés
+
+### 3. Exécuter la Suite de Tests Automatisés
 ```bash
 ./mvnw clean test
 ```
