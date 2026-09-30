@@ -201,7 +201,6 @@ cp .env.example .env
 
 ### 2. Démarrer le Serveur
 ```bash
-cd /home/user/Documents/Cours/JavaSpringUsers
 ./mvnw spring-boot:run
 ```
 *(Le serveur démarre sur le port `8081`).*
@@ -212,7 +211,7 @@ cd /home/user/Documents/Cours/JavaSpringUsers
 ./mvnw clean test
 ```
 
-La classe [`JavaSpringUsersApplicationTests`](file:///home/user/Documents/Cours/JavaSpringUsers/src/test/java/com/bsourichanh/users/JavaSpringUsersApplicationTests.java) valide **9 cas d'usage critiques** :
+La classe [`JavaSpringUsersApplicationTests`](src/test/java/com/bsourichanh/users/JavaSpringUsersApplicationTests.java) valide **9 cas d'usage critiques** :
 1. Démarrage sans erreur du contexte Spring Boot.
 2. Inscription publique et vérification du hachage BCrypt en base (le mot de passe n'est jamais stocké en clair).
 3. Rejet en `401 Unauthorized` pour toute requête sans jeton sur les routes protégées.
@@ -222,17 +221,3 @@ La classe [`JavaSpringUsersApplicationTests`](file:///home/user/Documents/Cours/
 7. Vérification de l'interdiction RBAC `403 Forbidden` quand un `ROLE_USER` tente de lister tous les utilisateurs.
 8. Autorisation réussie pour un compte `ROLE_ADMIN` sur la liste des utilisateurs.
 9. Contrôle d'accès propriétaire (`isOwner`) : Alice peut lire son propre profil, mais Bob est rejeté en `403 Forbidden` s'il tente d'espionner le profil d'Alice.
-
----
-
-## 🛡️ Durcissement & Refactorisation (Audit de Qualité & Sécurité)
-
-- **Cybersécurité & Validation** :
-  - **Protection Anti-Clickjacking** : sécurisation de la console H2 avec `headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))`.
-  - **Suppression du mot de passe par défaut** : rejet immédiat (`400 Bad Request`) si le mot de passe est absent lors de la création d'un utilisateur.
-  - **Gestion de conflit (REST)** : `POST /users` renvoie désormais un statut `409 Conflict` explicite si le nom d'utilisateur est déjà existant.
-  - **Validation des Payloads (Jakarta Validation)** : contraintes `@NotBlank`, `@Email`, et `@Size(min = 6)` sur [`UserCreationDto`](file:///home/user/Documents/Cours/JavaSpringUsers/src/main/java/com/bsourichanh/users/dto/UserCreationDto.java) et [`LoginRequest`](file:///home/user/Documents/Cours/JavaSpringUsers/src/main/java/com/bsourichanh/users/dto/LoginRequest.java), activées via `@Valid` sur les contrôleurs.
-- **Architecture en Couches & Patterns** :
-  - **Découplage Controller / Repository** : [`AuthController`](file:///home/user/Documents/Cours/JavaSpringUsers/src/main/java/com/bsourichanh/users/controller/AuthController.java) et [`UserSecurity`](file:///home/user/Documents/Cours/JavaSpringUsers/src/main/java/com/bsourichanh/users/security/UserSecurity.java) s'appuient désormais exclusivement sur l'interface [`UserService`](file:///home/user/Documents/Cours/JavaSpringUsers/src/main/java/com/bsourichanh/users/service/UserService.java), sans dépendance directe avec `UserRepository`.
-  - **Gestion Globale des Erreurs** : ajout de [`GlobalExceptionHandler`](file:///home/user/Documents/Cours/JavaSpringUsers/src/main/java/com/bsourichanh/users/controller/GlobalExceptionHandler.java) (`@RestControllerAdvice`) pour uniformiser le traitement des erreurs HTTP (400, 401, 403, 404, 409).
-
