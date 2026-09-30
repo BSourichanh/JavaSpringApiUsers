@@ -24,15 +24,21 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto createUser(UserCreationDto dto) {
-        Optional<UserEntity> existing = userRepository.findByUsername(dto.username());
-        if (existing.isPresent()) {
-            return toDto(existing.get());
+        if (userRepository.findByUsername(dto.username()).isPresent()) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.CONFLICT,
+                    "Ce nom d'utilisateur est déjà utilisé"
+            );
         }
 
-        String rawPassword = (dto.password() != null && !dto.password().isBlank())
-                ? dto.password()
-                : "defaultPassword123!";
-        String hashedPassword = passwordEncoder.encode(rawPassword);
+        if (dto.password() == null || dto.password().isBlank()) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.BAD_REQUEST,
+                    "Le mot de passe est obligatoire"
+            );
+        }
+
+        String hashedPassword = passwordEncoder.encode(dto.password());
         String role = (dto.role() != null && !dto.role().isBlank())
                 ? dto.role()
                 : "ROLE_USER";
@@ -45,6 +51,11 @@ public class UserServiceImpl implements UserService {
                 role
         );
         return toDto(userRepository.save(entity));
+    }
+
+    @Override
+    public Optional<UserEntity> getUserByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 
     @Override

@@ -18,33 +18,35 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
+import com.bsourichanh.users.service.UserService;
+
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final JwtService jwtService;
 
     public AuthController(
             AuthenticationManager authenticationManager,
-            UserRepository userRepository,
+            UserService userService,
             JwtService jwtService
     ) {
         this.authenticationManager = authenticationManager;
-        this.userRepository = userRepository;
+        this.userService = userService;
         this.jwtService = jwtService;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<?> login(@jakarta.validation.Valid @RequestBody LoginRequest request) {
         try {
             // Validation par Spring Security
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.username(), request.password())
             );
 
-            UserEntity user = userRepository.findByUsername(request.username())
+            UserEntity user = userService.getUserByUsername(request.username())
                     .orElseThrow(() -> new BadCredentialsException("Utilisateur introuvable"));
 
             String token = jwtService.generateToken(user.getId(), user.getUsername(), user.getRole());
